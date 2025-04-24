@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sports Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-light: #f5f5f5;
+      --bg-dark: #121212;
+      --card-light: #fff;
+      --card-dark: #1e1e1e;
+      --text-light: #000;
+      --text-dark: #fff;
+    }
+
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-light);
+      transition: 0.3s;
+    }
+
+    body.dark {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    header {
+      background-color: #000;
+      text-align: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    .site-title {
+      font-size: 32px;
+      font-weight: bold;
+      background: linear-gradient(120deg, #ffd700, #fff8dc, #ffd700);
+      background-size: 200% auto;
+      color: transparent;
+      background-clip: text;
+      -webkit-background-clip: text;
+      animation: shimmer 2.5s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% center; }
+      100% { background-position: -200% center; }
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+    }
+
+    .theme-toggle svg {
+      fill: white;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.5s ease;
+    }
+
+    .theme-toggle:hover svg {
+      transform: rotate(180deg);
+    }
+
+    .matches {
+      max-width: 800px;
+      margin: 30px auto;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .match {
+      background-color: var(--card-light);
+      border-radius: 10px;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 2px solid;
+      border-image: linear-gradient(to right, green, yellow) 1;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      opacity: 0;
+      transform: translateY(30px);
+      transition: 0.8s ease;
+      flex-wrap: wrap;
+    }
+
+    body.dark .match {
+      background-color: var(--card-dark);
+    }
+
+    .match.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .team {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      font-size: 14px;
+    }
+
+    .team img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+    }
+
+    .middle {
+      text-align: center;
+      flex: 1;
+    }
+
+    .watch-btn {
+      margin-top: 5px;
+      background: linear-gradient(120deg, #ffd700, #fff8dc, #ffd700);
+      background-size: 200% auto;
+      color: #000;
+      padding: 6px 14px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      animation: shimmer 3s linear infinite;
+      box-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
+    }
+
+    .note {
+      font-size: 10px;
+      color: gray;
+      margin-top: 4px;
+    }
+
+    .snowflake {
+      position: fixed;
+      top: -10px;
+      font-size: 18px;
+      color: white;
+      animation: fall linear infinite;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(100vh) rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="site-title">Sports Hub</div>
+  <button class="theme-toggle" onclick="toggleDarkMode()" aria-label="Toggle Theme">
+    <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M21.64 13a9 9 0 01-10.92-10.92A9 9 0 1021.64 13z"/>
+    </svg>
+  </button>
+</header>
+
+<section class="matches" id="match-container"></section>
+
+<script>
+  const matches = [
+    {
+      home: { name: "Real Madrid", logo: "https://crests.football-data.org/86.png" },
+      away: { name: "Barcelona", logo: "https://crests.football-data.org/81.png" },
+      links: ["https://www.facebook.com/share/16Dk4WZuQT/?mibextid=wwXIfr", "https://www.facebook.com/share/1ACaHGeCkk/?mibextid=wwXIfr"]
+    },
+    {
+      home: { name: "Liverpool", logo: "https://crests.football-data.org/64.png" },
+      away: { name: "Manchester City", logo: "https://crests.football-data.org/65.png" },
+      links: ["https://www.facebook.com/share/16Dk4WZuQT/?mibextid=wwXIfr", "https://www.facebook.com/share/1ACaHGeCkk/?mibextid=wwXIfr"]
+    }
+  ];
+
+  const container = document.getElementById("match-container");
+
+  matches.forEach((match, index) => {
+    const card = document.createElement("div");
+    card.className = "match";
+    card.innerHTML = `
+      <div class="team">
+        <span>${match.home.name}</span>
+        <img src="${match.home.logo}" />
+      </div>
+      <div class="middle">
+        <button class="watch-btn" id="watch-${index}">Watch</button>
+        <div class="note">First click: Open Ad. Second click: Open Live Match</div>
+      </div>
+      <div class="team" style="justify-content: flex-end;">
+        <img src="${match.away.logo}" />
+        <span>${match.away.name}</span>
+      </div>
+    `;
+    container.appendChild(card);
+
+    const btn = document.getElementById(`watch-${index}`);
+    btn.addEventListener("click", () => {
+      const clicked = sessionStorage.getItem(`match-${index}`);
+      if (!clicked) {
+        sessionStorage.setItem(`match-${index}`, "clicked");
+        window.open(match.links[0], "_blank");
+      } else {
+        window.open(match.links[1], "_blank");
+      }
+    });
+  });
+
+  // Scroll animation
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add("visible");
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll(".match").forEach(el => observer.observe(el));
+
+  // Snowfall effect
+  function createSnowflake() {
+    const flake = document.createElement("div");
+    flake.className = "snowflake";
+    flake.textContent = "❄️";
+    flake.style.left = Math.random() * window.innerWidth + "px";
+    flake.style.animationDuration = (3 + Math.random() * 3) + "s";
+    flake.style.opacity = Math.random();
+    document.body.appendChild(flake);
+    setTimeout(() => flake.remove(), 6000);
+  }
+
+  setInterval(createSnowflake, 300);
+
+  // Dark mode toggle
+  function toggleDarkMode() {
+    document.body.classList.toggle("dark");
+    const icon = document.getElementById("theme-icon");
+    if (document.body.classList.contains("dark")) {
+      icon.innerHTML = '<path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/>';
+    } else {
+      icon.innerHTML = '<path d="M21.64 13a9 9 0 01-10.92-10.92A9 9 0 1021.64 13z"/>';
+    }
+  }
+</script>
+
+</body>
+</html>
